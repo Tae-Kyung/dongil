@@ -3,24 +3,82 @@ import { ProductionRecord, ProductionRecordCSV } from '@/lib/types/production';
 
 // CSV 데이터를 ProductionRecord로 변환
 export function convertCSVToRecord(csvRow: ProductionRecordCSV): ProductionRecord {
-  // 날짜 파싱 헬퍼
+  // 날짜 파싱 헬퍼 (PostgreSQL DATE 형식: YYYY-MM-DD)
   const parseDate = (dateStr?: string): string | undefined => {
     if (!dateStr) return undefined;
     try {
-      // "2025-01-02" 형식
-      return dateStr.trim();
+      const trimmed = dateStr.trim();
+      // YYYY-MM-DD 형식 검증
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(trimmed)) {
+        return undefined;
+      }
+
+      // 실제 유효한 날짜인지 확인
+      const parts = trimmed.split('-');
+      const year = parseInt(parts[0]);
+      const month = parseInt(parts[1]);
+      const day = parseInt(parts[2]);
+
+      if (month < 1 || month > 12 || day < 1 || day > 31) {
+        return undefined;
+      }
+
+      return trimmed;
     } catch {
       return undefined;
     }
   };
 
-  // 시간 파싱 헬퍼
+  // 시간 파싱 헬퍼 (PostgreSQL TIME 형식: HH:MM:SS)
   const parseTime = (timeStr?: string): string | undefined => {
     if (!timeStr) return undefined;
     try {
-      // "오전 8:36:54" 형식을 "08:36:54"로 변환
-      const cleaned = timeStr.replace('오전', '').replace('오후', '').trim();
-      return cleaned;
+      const trimmed = timeStr.trim();
+
+      // "오전 8:36:54" 또는 "오후 2:30:00" 형식 처리
+      let hour = 0;
+      let minute = 0;
+      let second = 0;
+      let isPM = false;
+
+      if (trimmed.includes('오전') || trimmed.includes('오후')) {
+        isPM = trimmed.includes('오후');
+        const timeOnly = trimmed.replace('오전', '').replace('오후', '').trim();
+        const parts = timeOnly.split(':');
+
+        if (parts.length >= 2) {
+          hour = parseInt(parts[0]);
+          minute = parseInt(parts[1]);
+          second = parts.length >= 3 ? parseInt(parts[2]) : 0;
+
+          // 오후인 경우 12시간 더하기 (12시 제외)
+          if (isPM && hour !== 12) {
+            hour += 12;
+          }
+          // 오전 12시는 0시로 변환
+          if (!isPM && hour === 12) {
+            hour = 0;
+          }
+        }
+      } else {
+        // 이미 24시간 형식인 경우
+        const parts = trimmed.split(':');
+        if (parts.length >= 2) {
+          hour = parseInt(parts[0]);
+          minute = parseInt(parts[1]);
+          second = parts.length >= 3 ? parseInt(parts[2]) : 0;
+        }
+      }
+
+      // 유효성 검증
+      if (isNaN(hour) || isNaN(minute) || isNaN(second) ||
+          hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
+        return undefined;
+      }
+
+      // HH:MM:SS 형식으로 포맷팅
+      return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
     } catch {
       return undefined;
     }
@@ -39,12 +97,45 @@ export function convertCSVToRecord(csvRow: ProductionRecordCSV): ProductionRecor
     return boolStr.toUpperCase() === 'TRUE';
   };
 
-  // Timestamp 파싱
+  // Timestamp 파싱 (PostgreSQL TIMESTAMP 형식: YYYY-MM-DD HH:MM:SS)
   const parseTimestamp = (timestampStr?: string): string | undefined => {
     if (!timestampStr) return undefined;
     try {
-      // "2025-01-02 8:36" 형식
-      return timestampStr.trim();
+      const trimmed = timestampStr.trim();
+
+      // "2025-01-02 8:36" 또는 "2025-01-02 오전 8:36:54" 형식
+      const parts = trimmed.split(' ');
+      if (parts.length < 2) return undefined;
+
+      const datePart = parts[0];
+      const timePart = parts.slice(1).join(' '); // "오전 8:36:54" 또는 "8:36"
+
+      // 날짜 검증
+      const validDate = parseDate(datePart);
+      if (!validDate) return undefined;
+
+      // 시간 파싱
+      let timeFormatted = parseTime(timePart);
+
+      // 시간이 없으면 초까지 추가
+      if (!timeFormatted) {
+        // "8:36" 형식 처리
+        const simpleTimeParts = timePart.split(':');
+        if (simpleTimeParts.length >= 2) {
+          const hour = parseInt(simpleTimeParts[0]);
+          const minute = parseInt(simpleTimeParts[1]);
+          const second = simpleTimeParts.length >= 3 ? parseInt(simpleTimeParts[2]) : 0;
+
+          if (!isNaN(hour) && !isNaN(minute) && !isNaN(second) &&
+              hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 && second >= 0 && second <= 59) {
+            timeFormatted = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+          }
+        }
+      }
+
+      if (!timeFormatted) return undefined;
+
+      return `${validDate} ${timeFormatted}`;
     } catch {
       return undefined;
     }

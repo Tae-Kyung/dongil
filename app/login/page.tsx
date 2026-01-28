@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,12 +26,15 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      router.push('/dashboard');
-      router.refresh();
+
+      // redirectTo 파라미터가 있으면 그곳으로, 없으면 대시보드로
+      const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+
+      // 전체 페이지 새로고침으로 세션 쿠키가 확실히 설정되도록 함
+      window.location.href = redirectTo;
     } catch (err) {
       console.error('로그인 오류:', err);
       setError('이메일 또는 비밀번호가 올바르지 않습니다.');
-    } finally {
       setLoading(false);
     }
   };
