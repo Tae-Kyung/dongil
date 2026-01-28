@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
-import { format, startOfDay, endOfDay } from 'date-fns';
+import { format } from 'date-fns';
 
 export interface DashboardStats {
   totalQuantity: number;
@@ -27,156 +27,113 @@ export interface ProductStats {
   area_pyeong: number;
 }
 
-// 전체 통계 조회
+// 전체 통계 조회 (PostgreSQL RPC 함수 사용)
 export function useDashboardStats(startDate?: Date, endDate?: Date) {
   return useQuery({
     queryKey: ['dashboard-stats', startDate, endDate],
     queryFn: async (): Promise<DashboardStats> => {
-      let query = supabase
-        .from('production_records')
-        .select('quantity, area_pyeong, client, production_date');
+      const { data, error } = await supabase.rpc('get_dashboard_stats', {
+        start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+      });
 
-      if (startDate) {
-        query = query.gte('production_date', format(startDate, 'yyyy-MM-dd'));
+      if (error) {
+        console.error('Dashboard stats error:', error);
+        throw error;
       }
-      if (endDate) {
-        query = query.lte('production_date', format(endDate, 'yyyy-MM-dd'));
-      }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      const totalQuantity = data?.reduce((sum, record) => sum + (record.quantity || 0), 0) || 0;
-      const totalAreaPyeong = data?.reduce((sum, record) => sum + (record.area_pyeong || 0), 0) || 0;
-      const uniqueClients = new Set(data?.map(record => record.client).filter(Boolean)).size;
-
-      // 오늘 생산량
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const todayData = data?.filter(record => record.production_date === today) || [];
-      const todayQuantity = todayData.reduce((sum, record) => sum + (record.quantity || 0), 0);
+      // RPC 함수는 배열을 반환하므로 첫 번째 요소 사용
+      const stats = data?.[0] || {
+        total_quantity: 0,
+        total_area_pyeong: 0,
+        unique_clients: 0,
+        today_quantity: 0,
+      };
 
       return {
-        totalQuantity,
-        totalAreaPyeong,
-        uniqueClients,
-        todayQuantity,
+        totalQuantity: Number(stats.total_quantity) || 0,
+        totalAreaPyeong: Number(stats.total_area_pyeong) || 0,
+        uniqueClients: Number(stats.unique_clients) || 0,
+        todayQuantity: Number(stats.today_quantity) || 0,
       };
     },
+    staleTime: 1000 * 60 * 5, // 5분간 캐시
   });
 }
 
-// 생산량 추이 조회 (일별)
+// 생산량 추이 조회 (PostgreSQL RPC 함수 사용)
 export function useProductionTrend(startDate?: Date, endDate?: Date) {
   return useQuery({
     queryKey: ['production-trend', startDate, endDate],
     queryFn: async (): Promise<ProductionTrend[]> => {
-      let query = supabase
-        .from('production_records')
-        .select('production_date, quantity, area_pyeong')
-        .order('production_date', { ascending: true });
+      const { data, error } = await supabase.rpc('get_production_trend', {
+        start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+      });
 
-      if (startDate) {
-        query = query.gte('production_date', format(startDate, 'yyyy-MM-dd'));
-      }
-      if (endDate) {
-        query = query.lte('production_date', format(endDate, 'yyyy-MM-dd'));
+      if (error) {
+        console.error('Production trend error:', error);
+        throw error;
       }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // 날짜별로 그룹화
-      const grouped = (data || []).reduce((acc, record) => {
-        const date = record.production_date || '';
-        if (!acc[date]) {
-          acc[date] = { date, quantity: 0, area_pyeong: 0 };
-        }
-        acc[date].quantity += record.quantity || 0;
-        acc[date].area_pyeong += record.area_pyeong || 0;
-        return acc;
-      }, {} as Record<string, ProductionTrend>);
-
-      return Object.values(grouped);
+      return (data || []).map((row: any) => ({
+        date: row.date,
+        quantity: Number(row.quantity) || 0,
+        area_pyeong: Number(row.area_pyeong) || 0,
+      }));
     },
+    staleTime: 1000 * 60 * 5,
   });
 }
 
-// 거래처별 통계 조회 (상위 10개)
-export function useClientStats(startDate?: Date, endDate?: Date) {
+// 거래처별 통계 조회 (PostgreSQL RPC 함수 사용)
+export function useClientStats(startDate?: Date, endDate?: Date, limit: number = 10) {
   return useQuery({
-    queryKey: ['client-stats', startDate, endDate],
+    queryKey: ['client-stats', startDate, endDate, limit],
     queryFn: async (): Promise<ClientStats[]> => {
-      let query = supabase
-        .from('production_records')
-        .select('client, quantity, area_pyeong');
+      const { data, error } = await supabase.rpc('get_client_stats', {
+        start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+        limit_count: limit,
+      });
 
-      if (startDate) {
-        query = query.gte('production_date', format(startDate, 'yyyy-MM-dd'));
+      if (error) {
+        console.error('Client stats error:', error);
+        throw error;
       }
-      if (endDate) {
-        query = query.lte('production_date', format(endDate, 'yyyy-MM-dd'));
-      }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // 거래처별로 그룹화
-      const grouped = (data || []).reduce((acc, record) => {
-        const client = record.client || '미지정';
-        if (!acc[client]) {
-          acc[client] = { client, quantity: 0, area_pyeong: 0 };
-        }
-        acc[client].quantity += record.quantity || 0;
-        acc[client].area_pyeong += record.area_pyeong || 0;
-        return acc;
-      }, {} as Record<string, ClientStats>);
-
-      // 수량 기준 내림차순 정렬 후 상위 10개
-      return Object.values(grouped)
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 10);
+      return (data || []).map((row: any) => ({
+        client: row.client,
+        quantity: Number(row.quantity) || 0,
+        area_pyeong: Number(row.area_pyeong) || 0,
+      }));
     },
+    staleTime: 1000 * 60 * 5,
   });
 }
 
-// 품목별 통계 조회 (상위 10개)
-export function useProductStats(startDate?: Date, endDate?: Date) {
+// 품목별 통계 조회 (PostgreSQL RPC 함수 사용)
+export function useProductStats(startDate?: Date, endDate?: Date, limit: number = 10) {
   return useQuery({
-    queryKey: ['product-stats', startDate, endDate],
+    queryKey: ['product-stats', startDate, endDate, limit],
     queryFn: async (): Promise<ProductStats[]> => {
-      let query = supabase
-        .from('production_records')
-        .select('product_name, quantity, area_pyeong');
+      const { data, error } = await supabase.rpc('get_product_stats', {
+        start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+        limit_count: limit,
+      });
 
-      if (startDate) {
-        query = query.gte('production_date', format(startDate, 'yyyy-MM-dd'));
+      if (error) {
+        console.error('Product stats error:', error);
+        throw error;
       }
-      if (endDate) {
-        query = query.lte('production_date', format(endDate, 'yyyy-MM-dd'));
-      }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      // 품목별로 그룹화
-      const grouped = (data || []).reduce((acc, record) => {
-        const productName = record.product_name || '미지정';
-        if (!acc[productName]) {
-          acc[productName] = { product_name: productName, quantity: 0, area_pyeong: 0 };
-        }
-        acc[productName].quantity += record.quantity || 0;
-        acc[productName].area_pyeong += record.area_pyeong || 0;
-        return acc;
-      }, {} as Record<string, ProductStats>);
-
-      // 수량 기준 내림차순 정렬 후 상위 10개
-      return Object.values(grouped)
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 10);
+      return (data || []).map((row: any) => ({
+        product_name: row.product_name,
+        quantity: Number(row.quantity) || 0,
+        area_pyeong: Number(row.area_pyeong) || 0,
+      }));
     },
+    staleTime: 1000 * 60 * 5,
   });
 }
