@@ -31,9 +31,9 @@ interface AnalysisChartProps {
 
 export function AnalysisChart({ data, title, chartType, metric }: AnalysisChartProps) {
   const chartData = useMemo(() => {
-    return data.slice(0, 20).map((item) => ({
+    return data.slice(0, 15).map((item) => ({
       ...item,
-      name: item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name,
+      shortName: item.name.length > 12 ? item.name.substring(0, 12) + '...' : item.name,
     }));
   }, [data]);
 
@@ -44,7 +44,7 @@ export function AnalysisChart({ data, title, chartType, metric }: AnalysisChartP
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+          <div className="flex items-center justify-center h-[350px] text-muted-foreground">
             표시할 데이터가 없습니다.
           </div>
         </CardContent>
@@ -62,12 +62,40 @@ export function AnalysisChart({ data, title, chartType, metric }: AnalysisChartP
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={350}>
           {chartType === 'bar' ? (
-            <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis
+                type="category"
+                dataKey="shortName"
+                width={75}
+                tick={{ fontSize: 11 }}
+              />
+              <Tooltip
+                formatter={(value) => {
+                  if (value === undefined || value === null) return ['-', label];
+                  const numVal = Number(value);
+                  return [metric === 'quantity' ? numVal.toLocaleString() : numVal.toFixed(1), label];
+                }}
+                labelFormatter={(label) => {
+                  const item = data.find(d => d.name.startsWith(String(label).replace('...', '')));
+                  return item?.name || label;
+                }}
+              />
+              <Legend />
+              <Bar dataKey={dataKey} name={label} fill={color} />
+            </BarChart>
+          ) : (
+            <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
-                dataKey="name"
+                dataKey="shortName"
                 angle={-45}
                 textAnchor="end"
                 height={80}
@@ -81,27 +109,9 @@ export function AnalysisChart({ data, title, chartType, metric }: AnalysisChartP
                   const numVal = Number(value);
                   return [metric === 'quantity' ? numVal.toLocaleString() : numVal.toFixed(1), label];
                 }}
-              />
-              <Legend />
-              <Bar dataKey={dataKey} name={label} fill={color} />
-            </BarChart>
-          ) : (
-            <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                interval={0}
-                tick={{ fontSize: 11 }}
-              />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip
-                formatter={(value) => {
-                  if (value === undefined || value === null) return ['-', label];
-                  const numVal = Number(value);
-                  return [metric === 'quantity' ? numVal.toLocaleString() : numVal.toFixed(1), label];
+                labelFormatter={(label) => {
+                  const item = data.find(d => d.name.startsWith(String(label).replace('...', '')));
+                  return item?.name || label;
                 }}
               />
               <Legend />
