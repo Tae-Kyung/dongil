@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Upload, Table2, ArrowRight } from "lucide-react";
+import { BarChart3, Upload, Table2, ArrowRight, PieChart } from "lucide-react";
 
 export default function Home() {
   return (
@@ -16,7 +16,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-center gap-2 mb-2">
@@ -31,6 +31,28 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <Link href="/dashboard">
+                <Button variant="outline" className="w-full group">
+                  바로가기
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="rounded-lg bg-primary/10 p-2">
+                  <PieChart className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+              <CardTitle>다차원 분석</CardTitle>
+              <CardDescription>
+                기간별, 거래처별, 품목별 생산 현황을 분석하세요
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/analysis">
                 <Button variant="outline" className="w-full group">
                   바로가기
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -119,7 +141,18 @@ export default function Home() {
                 3
               </div>
               <div>
-                <p className="font-medium">상세 분석</p>
+                <p className="font-medium">다차원 분석</p>
+                <p className="text-sm text-muted-foreground">
+                  기간별, 거래처별, 품목별로 생산 현황을 피벗 분석합니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                4
+              </div>
+              <div>
+                <p className="font-medium">상세 데이터 조회</p>
                 <p className="text-sm text-muted-foreground">
                   데이터 그리드에서 세부 정보를 확인하고 필터링합니다.
                 </p>

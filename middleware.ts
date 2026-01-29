@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 보호된 라우트 목록
-  const protectedPaths = ['/dashboard', '/data', '/import'];
+  const protectedPaths = ['/dashboard', '/data', '/import', '/analysis'];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );

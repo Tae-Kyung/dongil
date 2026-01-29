@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Upload, Table2, Home, LogOut, User } from 'lucide-react';
+import { BarChart3, Upload, Table2, Home, LogOut, User, PieChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 const navigation = [
   { name: '홈', href: '/', icon: Home },
   { name: '대시보드', href: '/dashboard', icon: BarChart3 },
+  { name: '다차원 분석', href: '/analysis', icon: PieChart },
   { name: '데이터 그리드', href: '/data', icon: Table2 },
   { name: '데이터 임포트', href: '/import', icon: Upload },
 ];
