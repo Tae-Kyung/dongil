@@ -76,10 +76,11 @@ export function AnalysisChart({ data, title, chartType, metric }: AnalysisChartP
               />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip
-                formatter={(value: number) => [
-                  metric === 'quantity' ? value.toLocaleString() : value.toFixed(1),
-                  label
-                ]}
+                formatter={(value) => {
+                  if (value === undefined || value === null) return ['-', label];
+                  const numVal = Number(value);
+                  return [metric === 'quantity' ? numVal.toLocaleString() : numVal.toFixed(1), label];
+                }}
               />
               <Legend />
               <Bar dataKey={dataKey} name={label} fill={color} />
@@ -97,10 +98,11 @@ export function AnalysisChart({ data, title, chartType, metric }: AnalysisChartP
               />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip
-                formatter={(value: number) => [
-                  metric === 'quantity' ? value.toLocaleString() : value.toFixed(1),
-                  label
-                ]}
+                formatter={(value) => {
+                  if (value === undefined || value === null) return ['-', label];
+                  const numVal = Number(value);
+                  return [metric === 'quantity' ? numVal.toLocaleString() : numVal.toFixed(1), label];
+                }}
               />
               <Legend />
               <Line

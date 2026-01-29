@@ -29,7 +29,8 @@ export function ClientStatsChart({ data }: ClientStatsChartProps) {
             <YAxis />
             <Tooltip
               formatter={(value, name) => {
-                if (name === '수량') return [value.toLocaleString(), name];
+                if (value === undefined || value === null) return ['-', name];
+                if (name === '수량') return [Number(value).toLocaleString(), name];
                 if (name === '평수') return [Number(value).toFixed(1), name];
                 return [value, name];
               }}
