@@ -342,115 +342,19 @@
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui
-- **Charts**: Recharts (예정)
-- **State Management**: React Query (예정)
+- **Charts**: Recharts
+- **State Management**: React Query
 - **Icons**: Lucide React
 
 ### 백엔드/인프라
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **Hosting**: Vercel (예정)
+- **Hosting**: Vercel
 
 ### 개발 도구
 - **Package Manager**: pnpm
 - **Linting**: ESLint
 - **Git**: .gitignore 설정 완료
-
----
-
-## 프로젝트 구조
-
-```
-dongil/
-├── app/                          # Next.js 애플리케이션
-│   ├── app/                      # App Router
-│   │   ├── layout.tsx            # 루트 레이아웃
-│   │   ├── page.tsx              # 홈페이지
-│   │   └── globals.css           # 전역 스타일
-│   ├── components/               # 컴포넌트
-│   │   └── ui/                   # shadcn/ui 컴포넌트
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── table.tsx
-│   │       └── input.tsx
-│   ├── lib/                      # 유틸리티 및 라이브러리
-│   │   ├── utils.ts              # 공통 유틸
-│   │   └── supabase/             # Supabase 클라이언트
-│   │       ├── client.ts
-│   │       └── server.ts
-│   ├── supabase/                 # Supabase 설정
-│   │   ├── schema.sql            # DB 스키마
-│   │   └── README.md             # 설정 가이드
-│   ├── public/                   # 정적 파일
-│   ├── .env.local                # 환경변수 (gitignore)
-│   ├── .env.local.example        # 환경변수 템플릿
-│   ├── components.json           # shadcn/ui 설정
-│   ├── next.config.ts            # Next.js 설정
-│   ├── tailwind.config.ts        # Tailwind 설정
-│   ├── tsconfig.json             # TypeScript 설정
-│   ├── package.json              # 패키지 정보
-│   └── README.md                 # 프로젝트 README
-├── PRD.md                        # 제품 요구사항 정의서
-├── TASK.md                       # 작업 현황 (이 파일)
-├── prompt.md                     # 초기 요구사항
-├── 2026 생산실적 비고포함3.txt   # 샘플 데이터 (49MB)
-├── report1.png                   # 기존 보고서 참고
-└── report2.png                   # 기존 보고서 참고
-```
-
----
-
-## 다음 작업 우선순위
-
-1. **Supabase 설정 완료** (필수)
-   - SQL 스키마 실행
-   - 환경변수 설정
-   - 테스트 사용자 생성
-
-2. **Task #5**: CSV 파일 업로드 기능 구현
-   - 대용량 데이터 처리가 핵심
-
-3. **Task #6**: 기본 대시보드
-   - 사용자가 가장 먼저 보는 화면
-
-4. **Task #7**: 데이터 그리드
-   - 상세 데이터 조회 및 관리
-
-5. **Task #8**: 사용자 인증
-   - 보안 및 접근 제어
-
-6. **Task #9**: Vercel 배포
-   - 실제 운영 환경 구축
-
----
-
-## 주의사항
-
-### 보안
-- ✅ `.env.local`은 gitignore에 포함됨 (API 키 유출 방지)
-- ✅ RLS 정책 설정으로 데이터 접근 제어
-- ⚠️ 프로덕션 배포 시 Supabase 정책 재검토 필요
-
-### 성능
-- ✅ 데이터베이스 인덱스 설정 완료
-- ⚠️ 대용량 데이터(49MB) 업로드 시 배치 처리 필요
-- ⚠️ 차트 렌더링 최적화 고려 (가상화, 페이지네이션)
-
-### 데이터
-- 📊 생산실적 데이터: 약 49MB (CSV 형식)
-- 📊 예상 레코드 수: 수만 건 이상
-- 📊 23개 컬럼 (S, 등록일시, PID, 공정, 품목코드 등)
-
----
-
-## 참고 문서
-
-- [PRD.md](./PRD.md) - 제품 요구사항 정의서
-- [app/README.md](./app/README.md) - 프로젝트 README
-- [app/supabase/README.md](./app/supabase/README.md) - Supabase 설정 가이드
-- [app/UPLOAD_GUIDE.md](./app/UPLOAD_GUIDE.md) - 데이터 업로드 가이드
-
----
 
 ---
 
@@ -480,29 +384,206 @@ dongil/
 - **Hooks**: 3개 (useAuth, useDashboardData, useProductionData)
 - **문서**: 6개 (README, PRD, TASK, UPLOAD_GUIDE, DEPLOYMENT, Supabase README)
 
-### 다음 단계 (Phase 2 권장사항)
+---
 
-1. **다차원 분석 고도화**
-   - 피벗 테이블 구현
-   - 드릴다운/롤업 기능
-   - 커스텀 리포트 저장
+# Phase 1.5: 다차원 분석 기능 (완료)
 
-2. **추가 기능**
-   - 실시간 데이터 갱신 (Supabase Realtime)
-   - 데이터 수정/삭제 기능
-   - 엑셀/PDF 내보내기
-   - 이메일 리포트 자동 발송
+**완료일**: 2026-01-29
+**진행률**: ✅ 100% 완료
 
-3. **성능 최적화**
-   - Materialized View 활용
-   - 차트 가상화
-   - 이미지 최적화
-
-4. **UI/UX 개선**
-   - 다크 모드
-   - 모바일 최적화
-   - 다국어 지원
+### ✅ Task #10: 다차원 분석 페이지
+- [x] 피벗 테이블 구현 (거래처별/품목별 × 기간별)
+- [x] 차트 분석 (가로 바 차트, 라인 차트)
+- [x] 교차 분석 (거래처-품목 조합)
+- [x] 필터 기능 (기간, 집계 단위, 분석 기준, 측정 지표)
+- [x] PostgreSQL RPC 함수 6개 추가
+- [x] UI 컴포넌트 추가 (Select, Tabs)
 
 ---
 
-**최종 업데이트**: 2026-01-28
+# Phase 2: 분석 고도화 (단기 - 2주)
+
+**목표**: 비교 분석 및 추세 파악 기능 강화
+**예상 기간**: 2주
+
+### 📋 Task #11: 전년 동기 대비 분석
+**상태**: 대기
+**우선순위**: 높음
+
+**작업 내용**:
+- [ ] 전년 동월 대비 증감률 계산 함수 추가
+- [ ] 대시보드 KPI에 전년 대비 표시 (↑12%, ↓5% 등)
+- [ ] 전년 동기 비교 차트 추가
+- [ ] 성장률 트렌드 시각화
+
+**기술 구현**:
+```sql
+-- 전년 동기 대비 함수 예시
+CREATE FUNCTION get_yoy_comparison(target_date DATE)
+RETURNS TABLE (current_qty, prev_year_qty, growth_rate)
+```
+
+---
+
+### 📋 Task #12: 이동평균 추세선
+**상태**: 대기
+**우선순위**: 높음
+
+**작업 내용**:
+- [ ] 7일/30일 이동평균 계산 로직
+- [ ] 생산량 추이 차트에 추세선 오버레이
+- [ ] 추세 방향 표시 (상승/하락/보합)
+- [ ] 이상치 하이라이트
+
+**기술 구현**:
+- Recharts Reference Line 활용
+- PostgreSQL Window Function (AVG OVER)
+
+---
+
+### 📋 Task #13: 거래처 집중도 분석
+**상태**: 대기
+**우선순위**: 중간
+
+**작업 내용**:
+- [ ] 상위 5개 거래처 의존도 계산
+- [ ] 파레토 차트 (ABC 분석)
+- [ ] 거래처 리스크 점수 산출
+- [ ] 집중도 경고 알림 (특정 거래처 비중 > 30%)
+
+**산출물**:
+- 거래처 집중도 대시보드 위젯
+- 리스크 분석 리포트
+
+---
+
+# Phase 3: 목표 관리 및 리포팅 (중기 - 1개월)
+
+**목표**: 목표 설정 및 자동 리포트 생성
+**예상 기간**: 1개월
+
+### 📋 Task #14: 월별 목표 설정 및 달성률
+**상태**: 대기
+**우선순위**: 높음
+
+**작업 내용**:
+- [ ] 목표 테이블 스키마 설계 (production_targets)
+- [ ] 목표 입력/수정 UI
+- [ ] 달성률 게이지 차트
+- [ ] 목표 대비 진행률 대시보드
+- [ ] 목표 미달 알림
+
+**데이터 모델**:
+```sql
+CREATE TABLE production_targets (
+  id SERIAL PRIMARY KEY,
+  year INT,
+  month INT,
+  target_quantity BIGINT,
+  target_area_pyeong NUMERIC,
+  client VARCHAR,  -- NULL이면 전체
+  product_name VARCHAR  -- NULL이면 전체
+);
+```
+
+---
+
+### 📋 Task #15: 자동 리포트 생성 (PDF)
+**상태**: 대기
+**우선순위**: 중간
+
+**작업 내용**:
+- [ ] 주간/월간 리포트 템플릿 설계
+- [ ] PDF 생성 라이브러리 연동 (react-pdf 또는 puppeteer)
+- [ ] 리포트 다운로드 기능
+- [ ] 리포트 자동 생성 스케줄링
+
+**리포트 내용**:
+- 기간별 생산 요약
+- 주요 KPI 및 전기 대비
+- 거래처별/품목별 Top 10
+- 차트 이미지 포함
+
+---
+
+### 📋 Task #16: 이상치 알림 기능
+**상태**: 대기
+**우선순위**: 중간
+
+**작업 내용**:
+- [ ] 이상치 탐지 알고리즘 (표준편차 기반)
+- [ ] 알림 설정 UI (임계값 설정)
+- [ ] 대시보드 알림 배지
+- [ ] 이메일 알림 (선택)
+
+**탐지 기준**:
+- 평소 대비 ±2σ 이상 변동
+- 연속 3일 감소/증가
+- 특정 거래처 급변
+
+---
+
+# Phase 4: 예측 및 고급 분석 (장기 - 2~3개월)
+
+**목표**: AI/ML 기반 예측 및 고급 분석
+**예상 기간**: 2~3개월
+
+### 📋 Task #17: 시계열 예측 모델
+**상태**: 대기
+**우선순위**: 낮음
+
+**작업 내용**:
+- [ ] 예측 모델 선택 (이동평균, 지수평활, ARIMA)
+- [ ] Python 예측 서비스 구축 (FastAPI)
+- [ ] Next.js와 API 연동
+- [ ] 예측 결과 시각화 (신뢰구간 포함)
+
+**기술 스택**:
+- Python + pandas + statsmodels
+- FastAPI 또는 Supabase Edge Functions
+- Vercel Serverless Functions
+
+---
+
+### 📋 Task #18: 대시보드 커스터마이징
+**상태**: 대기
+**우선순위**: 낮음
+
+**작업 내용**:
+- [ ] 드래그 앤 드롭 위젯 배치
+- [ ] 위젯 크기 조절
+- [ ] 사용자별 레이아웃 저장
+- [ ] 위젯 추가/삭제
+
+**라이브러리**:
+- react-grid-layout
+
+---
+
+### 📋 Task #19: 모바일 앱 / PWA
+**상태**: 대기
+**우선순위**: 낮음
+
+**작업 내용**:
+- [ ] PWA 매니페스트 설정
+- [ ] 오프라인 지원 (Service Worker)
+- [ ] 모바일 최적화 UI
+- [ ] 푸시 알림
+
+---
+
+## 우선순위 요약
+
+| 순위 | Task | 예상 기간 | 비즈니스 가치 |
+|------|------|----------|--------------|
+| 1 | 전년 동기 대비 분석 | 3일 | 높음 - 성과 비교 |
+| 2 | 이동평균 추세선 | 2일 | 높음 - 트렌드 파악 |
+| 3 | 거래처 집중도 분석 | 3일 | 중간 - 리스크 관리 |
+| 4 | 월별 목표 달성률 | 1주 | 높음 - 목표 관리 |
+| 5 | 자동 리포트 (PDF) | 1주 | 중간 - 업무 효율화 |
+| 6 | 이상치 알림 | 4일 | 중간 - 조기 경보 |
+| 7 | 시계열 예측 | 2주 | 낮음 - 미래 대비 |
+
+---
+
+**최종 업데이트**: 2026-01-29
