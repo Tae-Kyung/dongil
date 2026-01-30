@@ -258,10 +258,11 @@ export function ConcentrationAnalysis({
                   tickFormatter={(value) => value.length > 12 ? value.substring(0, 12) + '...' : value}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => {
-                    if (name === 'percentage') return [`${value.toFixed(1)}%`, '비중'];
-                    if (name === 'cumulativePercentage') return [`${value.toFixed(1)}%`, '누적비중'];
-                    return [value, name];
+                  formatter={(value, name) => {
+                    const numValue = Number(value) || 0;
+                    if (name === 'percentage') return [`${numValue.toFixed(1)}%`, '비중'];
+                    if (name === 'cumulativePercentage') return [`${numValue.toFixed(1)}%`, '누적비중'];
+                    return [numValue, name];
                   }}
                   labelFormatter={(label) => `${label}`}
                   contentStyle={{ fontSize: 12 }}

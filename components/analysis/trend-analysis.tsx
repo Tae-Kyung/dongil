@@ -346,15 +346,16 @@ export function TrendAnalysis({
                 }
               />
               <Tooltip
-                formatter={(value: number, name: string) => {
+                formatter={(value, name) => {
+                  const numValue = Number(value) || 0;
                   const labels: Record<string, string> = {
                     value: metricLabel,
                     maShort: `${maShortPeriod}일 이동평균`,
                     maLong: `${maLongPeriod}일 이동평균`,
                   };
                   const formattedValue =
-                    metric === 'quantity' ? value.toLocaleString() : value.toFixed(1);
-                  return [formattedValue, labels[name] || name];
+                    metric === 'quantity' ? numValue.toLocaleString() : numValue.toFixed(1);
+                  return [formattedValue, labels[String(name)] || name];
                 }}
                 labelFormatter={(label) => `${label}`}
               />

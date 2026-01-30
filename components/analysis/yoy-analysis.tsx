@@ -309,10 +309,13 @@ export function YoYAnalysis({
                   }
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    metric === 'quantity' ? value.toLocaleString() : value.toFixed(1),
-                    name === 'currentValue' ? `${targetYear}년` : `${targetYear - 1}년`,
-                  ]}
+                  formatter={(value, name) => {
+                    const numValue = Number(value) || 0;
+                    return [
+                      metric === 'quantity' ? numValue.toLocaleString() : numValue.toFixed(1),
+                      name === 'currentValue' ? `${targetYear}년` : `${targetYear - 1}년`,
+                    ];
+                  }}
                   labelFormatter={(label) => `${label}`}
                 />
                 <Legend
@@ -359,7 +362,7 @@ export function YoYAnalysis({
                   domain={['auto', 'auto']}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${value?.toFixed(1) ?? '-'}%`, '성장률']}
+                  formatter={(value) => [`${Number(value)?.toFixed(1) ?? '-'}%`, '성장률']}
                   labelFormatter={(label) => `${label}`}
                 />
                 <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" />
