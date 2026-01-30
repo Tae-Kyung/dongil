@@ -14,10 +14,17 @@ import {
   usePivotAnalysis,
   useAnalysisByClientProduct,
   useClientList,
+  useConcentrationAnalysis,
+  useTrendAnalysis,
+  useYoYAnalysis,
+  useAvailableYears,
   PeriodType,
   RowDimension,
   MetricType,
 } from '@/lib/hooks/use-analysis-data';
+import { ConcentrationAnalysis } from '@/components/analysis/concentration-analysis';
+import { TrendAnalysis } from '@/components/analysis/trend-analysis';
+import { YoYAnalysis } from '@/components/analysis/yoy-analysis';
 import {
   Select,
   SelectContent,
@@ -39,6 +46,13 @@ export default function AnalysisPage() {
   const [metric, setMetric] = useState<MetricType>('quantity');
   const [selectedClient, setSelectedClient] = useState<string>('all');
 
+  // 이동평균 설정
+  const [maShortPeriod, setMaShortPeriod] = useState<number>(7);
+  const [maLongPeriod, setMaLongPeriod] = useState<number>(30);
+
+  // YoY 분석 설정
+  const [yoyYear, setYoyYear] = useState<number>(new Date().getFullYear());
+
   // 데이터 조회
   const { data: pivotData, isLoading: pivotLoading, error: pivotError } = usePivotAnalysis(
     dateRange?.from,
@@ -55,6 +69,30 @@ export default function AnalysisPage() {
   );
 
   const { data: clientList } = useClientList(dateRange?.from, dateRange?.to);
+
+  // 집중도 분석 데이터
+  const {
+    data: concentrationData,
+    summary: concentrationSummary,
+    isLoading: concentrationLoading,
+  } = useConcentrationAnalysis(dateRange?.from, dateRange?.to, rowDimension, metric);
+
+  // 이동평균 분석 데이터
+  const {
+    data: trendData,
+    summary: trendSummary,
+    isLoading: trendLoading,
+  } = useTrendAnalysis(dateRange?.from, dateRange?.to, maShortPeriod, maLongPeriod);
+
+  // 전년 동기 대비 분석 데이터
+  const {
+    data: yoyData,
+    summary: yoySummary,
+    isLoading: yoyLoading,
+  } = useYoYAnalysis(yoyYear, metric);
+
+  // 사용 가능한 연도 목록
+  const { years: availableYears } = useAvailableYears();
 
   // SQL 함수 미등록 오류 체크
   const hasSetupError = pivotError || crossError;
@@ -212,6 +250,9 @@ export default function AnalysisPage() {
           <TabsTrigger value="pivot">피벗 테이블</TabsTrigger>
           <TabsTrigger value="chart">차트 분석</TabsTrigger>
           <TabsTrigger value="cross">교차 분석</TabsTrigger>
+          <TabsTrigger value="concentration">집중도 분석</TabsTrigger>
+          <TabsTrigger value="trend">추세 분석</TabsTrigger>
+          <TabsTrigger value="yoy">전년 대비</TabsTrigger>
         </TabsList>
 
         {/* 피벗 테이블 탭 */}
@@ -282,6 +323,44 @@ export default function AnalysisPage() {
               title={selectedClient === 'all' ? '거래처-품목 교차 분석 (상위 100)' : `${selectedClient} 품목별 분석`}
             />
           )}
+        </TabsContent>
+
+        {/* 집중도 분석 탭 */}
+        <TabsContent value="concentration">
+          <ConcentrationAnalysis
+            data={concentrationData}
+            summary={concentrationSummary}
+            dimension={rowDimension}
+            metric={metric}
+            isLoading={concentrationLoading}
+          />
+        </TabsContent>
+
+        {/* 추세 분석 탭 */}
+        <TabsContent value="trend">
+          <TrendAnalysis
+            data={trendData}
+            summary={trendSummary}
+            metric={metric}
+            isLoading={trendLoading}
+            maShortPeriod={maShortPeriod}
+            maLongPeriod={maLongPeriod}
+            onMaShortChange={setMaShortPeriod}
+            onMaLongChange={setMaLongPeriod}
+          />
+        </TabsContent>
+
+        {/* 전년 동기 대비 분석 탭 */}
+        <TabsContent value="yoy">
+          <YoYAnalysis
+            data={yoyData}
+            summary={yoySummary}
+            targetYear={yoyYear}
+            metric={metric}
+            isLoading={yoyLoading}
+            availableYears={availableYears}
+            onYearChange={setYoyYear}
+          />
         </TabsContent>
       </Tabs>
     </div>
