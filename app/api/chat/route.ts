@@ -92,8 +92,9 @@ export async function POST(request: Request) {
                   const input = block.input as { query: string; explanation?: string };
                   const query = input.query;
 
-                  // SELECT 쿼리만 허용
-                  if (!query.trim().toUpperCase().startsWith('SELECT')) {
+                  // SELECT 또는 WITH(CTE) 쿼리만 허용
+                  const upperQuery = query.trim().toUpperCase();
+                  if (!upperQuery.startsWith('SELECT') && !upperQuery.startsWith('WITH')) {
                     toolResults.push({
                       type: 'tool_result',
                       tool_use_id: block.id,
