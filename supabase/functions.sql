@@ -1276,3 +1276,23 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION execute_nl_query TO authenticated;
+
+-- ===================================================================
+-- 앱 설정 테이블 (AI 프롬프트 등 관리자 설정)
+-- ===================================================================
+CREATE TABLE IF NOT EXISTS app_settings (
+  key   VARCHAR(100) PRIMARY KEY,
+  value TEXT         NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "인증된 사용자는 설정을 조회할 수 있습니다"
+  ON app_settings FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "인증된 사용자는 설정을 수정할 수 있습니다"
+  ON app_settings FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "인증된 사용자는 설정을 업데이트할 수 있습니다"
+  ON app_settings FOR UPDATE TO authenticated USING (true) WITH CHECK (true);

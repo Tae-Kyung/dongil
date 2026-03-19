@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `당신은 동일유리 생산실적 데이터 분석 AI 어시스턴트입니다.
+export const DEFAULT_SYSTEM_PROMPT = `당신은 동일유리 생산실적 데이터 분석 AI 어시스턴트입니다.
 의사결정자가 자연어로 질문하면 데이터베이스에서 정보를 조회하여 명확하고 통찰력 있는 답변을 제공합니다.
 
 ## 데이터베이스 스키마
@@ -72,6 +72,14 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ error: '로그인이 필요합니다.' }), { status: 401 });
     }
 
+    // DB에서 커스텀 프롬프트 로드 (없으면 기본값 사용)
+    const { data: settingRow } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'chat_system_prompt')
+      .single();
+    const systemPrompt = settingRow?.value ?? DEFAULT_SYSTEM_PROMPT;
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -90,7 +98,7 @@ export async function POST(request: Request) {
             const claudeStream = anthropic.messages.stream({
               model: 'claude-opus-4-6',
               max_tokens: 4096,
-              system: SYSTEM_PROMPT,
+              system: systemPrompt,
               tools: TOOLS,
               messages: apiMessages,
             });
