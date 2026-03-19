@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const { data: settingRow } = await supabase
       .from('app_settings')
       .select('value')
-      .eq('key', 'chat_system_prompt')
+      .eq('setting_key', 'chat_system_prompt')
       .single();
     const systemPrompt = settingRow?.value ?? DEFAULT_SYSTEM_PROMPT;
 

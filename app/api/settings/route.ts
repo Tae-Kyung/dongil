@@ -8,8 +8,8 @@ export async function GET() {
 
   const { data } = await supabase
     .from('app_settings')
-    .select('key, value')
-    .eq('key', 'chat_system_prompt')
+    .select('setting_key, value')
+    .eq('setting_key', 'chat_system_prompt')
     .single();
 
   return NextResponse.json({ value: data?.value ?? null });
@@ -27,7 +27,7 @@ export async function PUT(request: Request) {
 
   const { error } = await supabase
     .from('app_settings')
-    .upsert({ key: 'chat_system_prompt', value: value.trim(), updated_at: new Date().toISOString() });
+    .upsert({ setting_key: 'chat_system_prompt', value: value.trim(), updated_at: new Date().toISOString() });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

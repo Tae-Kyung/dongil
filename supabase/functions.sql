@@ -1281,9 +1281,9 @@ GRANT EXECUTE ON FUNCTION execute_nl_query TO authenticated;
 -- 앱 설정 테이블 (AI 프롬프트 등 관리자 설정)
 -- ===================================================================
 CREATE TABLE IF NOT EXISTS app_settings (
-  key   VARCHAR(100) PRIMARY KEY,
-  value TEXT         NOT NULL,
-  updated_at TIMESTAMP DEFAULT NOW()
+  setting_key VARCHAR(100) PRIMARY KEY,
+  value       TEXT         NOT NULL,
+  updated_at  TIMESTAMP    DEFAULT NOW()
 );
 
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
