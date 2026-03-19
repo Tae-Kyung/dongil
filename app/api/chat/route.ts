@@ -109,6 +109,8 @@ export async function POST(request: Request) {
                   const { data, error } = await supabase.rpc('execute_nl_query', { query_text: query });
 
                   if (error) {
+                    // 실제 오류를 프론트엔드에도 전달
+                    emit({ type: 'sql_error', message: error.message, code: error.code });
                     toolResults.push({
                       type: 'tool_result',
                       tool_use_id: block.id,

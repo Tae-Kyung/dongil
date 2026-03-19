@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 interface SqlBlock {
   sql: string;
   explanation: string;
+  sqlError?: string;
 }
 
 interface Message {
@@ -26,7 +27,7 @@ const SAMPLE_QUESTIONS = [
   '가장 많이 생산된 품명 TOP 5는?',
 ];
 
-function SqlViewer({ sql, explanation }: SqlBlock) {
+function SqlViewer({ sql, explanation, sqlError }: SqlBlock) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-2 rounded-md border border-border/50 overflow-hidden text-xs">
@@ -41,6 +42,11 @@ function SqlViewer({ sql, explanation }: SqlBlock) {
         <pre className="p-3 bg-muted/30 overflow-x-auto text-foreground font-mono leading-relaxed whitespace-pre-wrap break-all">
           {sql}
         </pre>
+      )}
+      {sqlError && (
+        <div className="px-3 py-2 bg-destructive/10 text-destructive text-xs font-mono border-t border-destructive/20">
+          오류: {sqlError}
+        </div>
       )}
     </div>
   );
@@ -151,6 +157,21 @@ export default function ChatPage() {
                 };
                 return updated;
               });
+            } else if (event.type === 'sql_error') {
+              if (sqlBlocks.length > 0) {
+                sqlBlocks[sqlBlocks.length - 1] = {
+                  ...sqlBlocks[sqlBlocks.length - 1],
+                  sqlError: event.message,
+                };
+                setMessages(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = {
+                    ...updated[updated.length - 1],
+                    sqlBlocks: [...sqlBlocks],
+                  };
+                  return updated;
+                });
+              }
             } else if (event.type === 'error') {
               assistantText = `오류가 발생했습니다: ${event.message}`;
               setMessages(prev => {
