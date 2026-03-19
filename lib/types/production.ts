@@ -43,6 +43,7 @@ export interface ProductionRecordCSV {
   평수?: string;
   의뢰번호?: string;
   "NO."?: string;
+  "NO"?: string;
   거래처?: string;
   현장?: string;
   라인?: string;
