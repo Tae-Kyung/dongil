@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Upload, Table2, Home, LogOut, User, PieChart, Target } from 'lucide-react';
+import { BarChart3, Upload, Table2, Home, LogOut, User, PieChart, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ const navigation = [
   { name: '목표 설정', href: '/targets', icon: Target },
   { name: '데이터 그리드', href: '/data', icon: Table2 },
   { name: '데이터 임포트', href: '/import', icon: Upload },
+  { name: 'AI 분석', href: '/chat', icon: Sparkles },
 ];
 
 export function Navbar() {

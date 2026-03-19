@@ -1240,3 +1240,39 @@ GRANT EXECUTE ON FUNCTION get_production_targets(INT) TO authenticated;
 -- 9. 피벗 분석 (거래처별 월별)
 -- SELECT * FROM get_pivot_analysis(NULL, NULL, 'client', 'monthly');
 -- ===================================================================
+
+-- ===================================================================
+-- NL2SQL: 자연어 쿼리 실행 함수
+-- ===================================================================
+CREATE OR REPLACE FUNCTION execute_nl_query(query_text TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  result JSONB;
+  safe_query TEXT;
+BEGIN
+  safe_query := trim(query_text);
+
+  -- SELECT 쿼리만 허용
+  IF NOT (upper(safe_query) LIKE 'SELECT%') THEN
+    RAISE EXCEPTION 'SELECT 쿼리만 허용됩니다.';
+  END IF;
+
+  -- LIMIT 없으면 자동 추가 (최대 500행)
+  IF NOT (upper(safe_query) ~ 'LIMIT[[:space:]]+[0-9]+') THEN
+    safe_query := safe_query || ' LIMIT 500';
+  END IF;
+
+  EXECUTE 'SELECT COALESCE(json_agg(t), ''[]''::json) FROM (' || safe_query || ') t'
+    INTO result;
+
+  RETURN result;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION '쿼리 오류: %', SQLERRM;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION execute_nl_query TO authenticated;
