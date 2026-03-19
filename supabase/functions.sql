@@ -1257,18 +1257,11 @@ BEGIN
   safe_query := trim(query_text);
   upper_query := upper(safe_query);
 
-  -- SELECT 또는 WITH(CTE)으로 시작하는 쿼리만 허용
   IF NOT (upper_query LIKE 'SELECT%' OR upper_query LIKE 'WITH%') THEN
     RAISE EXCEPTION 'SELECT 쿼리만 허용됩니다.';
   END IF;
 
-  -- WITH 쿼리의 경우 최종적으로 SELECT가 포함되어야 함
-  IF upper_query LIKE 'WITH%' AND position('SELECT' IN upper_query) = 0 THEN
-    RAISE EXCEPTION 'SELECT 쿼리만 허용됩니다.';
-  END IF;
-
-  -- LIMIT 없으면 자동 추가 (최대 500행)
-  IF NOT (upper_query ~ 'LIMIT[[:space:]]+[0-9]+') THEN
+  IF position('LIMIT' IN upper_query) = 0 THEN
     safe_query := safe_query || ' LIMIT 500';
   END IF;
 
