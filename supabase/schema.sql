@@ -30,6 +30,10 @@ CREATE TABLE IF NOT EXISTS production_records (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- 중복 방지 UNIQUE 제약 (registered_at + pid 조합)
+ALTER TABLE production_records
+  ADD CONSTRAINT IF NOT EXISTS uq_registered_at_pid UNIQUE (registered_at, pid);
+
 -- 인덱스 생성 (성능 최적화)
 CREATE INDEX IF NOT EXISTS idx_production_date ON production_records(production_date);
 CREATE INDEX IF NOT EXISTS idx_client ON production_records(client);
